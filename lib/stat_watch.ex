@@ -1,4 +1,9 @@
 defmodule StatWatch do
+  def run do
+    fetch_stats()
+    |> save_csv
+  end
+
   def column_names() do
     Enum.join(~w(DateTime Subscribers Videos Views), ",")
   end
@@ -20,6 +25,18 @@ defmodule StatWatch do
       stats.viewCount
     ]
     |> Enum.join(", ")
+  end
+
+  def save_csv(row_of_stats) do
+    filename = "stats.csv"
+
+    unless File.exists?(filename) do
+      File.write!(filename, column_names() <> "\n")
+    end
+
+    File.write!(filename, row_of_stats <> "\n", [
+      :append
+    ])
   end
 
   def stats_url do
