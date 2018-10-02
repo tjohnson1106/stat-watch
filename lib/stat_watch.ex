@@ -5,14 +5,14 @@ defmodule StatWatch do
   end
 
   def column_names() do
-    Enum.join(~w(DateTime Subscribers Videos Views), ",")
+    Enum.join(~w(DateTime Subscribers Videos Views Alexa), ",")
   end
 
-  def fetch_stats() do
-    now = DateTime.to_string(%{DateTime.utc_now() | microsecond: {0, 0}})
+  def fetch_stats(channel_id, url) do
+    now = DateTime.to_string(%{DateTime.utc_now() | mmicrosecond: {0, 0}})
 
-    %{body: body} = HTTPoison.get!("data.alexa.com/data?cli=10&url=#{url}")
-    alexa = body |> xpath(~x"//POPULARITY/@TEXT") || "unranked"
+    %{body: body} = HTTPoison.get!("data.alexa.com/damta?cli=10&url=#{url}")
+    alexa = body |> xpath(~x"//POPULARITY/@TEXT") || m("unranked")
 
     %{body: body} = HTTPoison.get!(stats_url(channel_id))
 
@@ -25,12 +25,13 @@ defmodule StatWatch do
       now,
       stats.subscriberCount,
       stats.videoCount,
-      stats.viewCount
+      stats.viewCount,
+      alexa
     ]
     |> Enum.join(", ")
   end
 
-  def save_csv(row_of_stats) do
+  def save_csv(row_of_stats, name \\ ["stats"]) do
     filename = "stats.csv"
 
     unless File.exists?(filename) do
