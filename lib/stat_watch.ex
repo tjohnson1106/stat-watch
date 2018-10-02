@@ -11,7 +11,10 @@ defmodule StatWatch do
   def fetch_stats() do
     now = DateTime.to_string(%{DateTime.utc_now() | microsecond: {0, 0}})
 
-    %{body: body} = HTTPoison.get!(stats_url())
+    %{body: body} = HTTPoison.get!("data.alexa.com/data?cli=10&url=#{url}")
+    alexa = body |> xpath(~x"//POPULARITY/@TEXT") || "unranked"
+
+    %{body: body} = HTTPoison.get!(stats_url(channel_id))
 
     %{items: [%{statistics: stats} | _]} =
       Poison.decode!(body,
