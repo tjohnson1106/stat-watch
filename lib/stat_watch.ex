@@ -9,10 +9,10 @@ defmodule StatWatch do
   end
 
   def fetch_stats(channel_id, url) do
-    now = DateTime.to_string(%{DateTime.utc_now() | mmicrosecond: {0, 0}})
+    now = DateTime.to_string(%{DateTime.utc_now() | microsecond: {0, 0}})
 
-    %{body: body} = HTTPoison.get!("data.alexa.com/damta?cli=10&url=#{url}")
-    alexa = body |> xpath(~x"//POPULARITY/@TEXT") || m("unranked")
+    %{body: body} = HTTPoison.get!("data.alexa.com/data?cli=10&url=#{url}")
+    alexa = body |> xpath(~x"//POPULARITY/@TEXT") || "unranked"
 
     %{body: body} = HTTPoison.get!(stats_url(channel_id))
 
@@ -32,7 +32,7 @@ defmodule StatWatch do
   end
 
   def save_csv(row_of_stats, name \\ ["stats"]) do
-    filename = "stats.csv"
+    filename = "stats/#{name}.csv"
 
     unless File.exists?(filename) do
       File.write!(filename, column_names() <> "\n")
